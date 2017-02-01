@@ -42,8 +42,10 @@ public class Accepted{
 			for(int j = 0; j < verticeArray.length; j++){
 				currentSimplex.vert.remove(verticeArray[j]);
 				for(int k = 0; k < n; k++){
-					if(Simplex.isEqual(currentSimplex, simplices.get(k))){
+					if(Simplex.isEqual(currentSimplex, simplices.get(k)) &&
+						k != i){
 						newColumn.add(k);
+						break;
 					}
 				}
 				currentSimplex.vert.add(verticeArray[j]);
@@ -51,7 +53,26 @@ public class Accepted{
 			// re-increase the dimension of currentSimplex
 			currentSimplex.dim++;
 			// add the new column to the matrix
+			Collections.sort(newColumn);
 			matrix.add(newColumn);
+		}
+	}
+
+	public static void main(String[] args) throws FileNotFoundException{
+		Accepted obj = new Accepted(args[0]);
+		for(int i = 0; i < obj.simplices.size(); i++){
+			System.out.println(obj.simplices.get(i));
+		}
+		obj.buildMatrix();
+		for(int i = 0; i < obj.simplices.size(); i++){
+			if(obj.matrix.get(i).size() == 0){
+				System.out.println("Empty column");
+				continue;
+			}
+			for(Integer el : obj.matrix.get(i)){
+				System.out.print(el + " ");
+			}
+			System.out.println();
 		}
 	}
 
