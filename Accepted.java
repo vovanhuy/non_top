@@ -1,5 +1,7 @@
 import java.util.Vector;
 import java.util.LinkedList;
+import java.util.TreeSet;
+import java.util.Iterator;
 import java.util.Collections;
 import java.io.FileNotFoundException;
 import java.util.Comparator;
@@ -58,12 +60,83 @@ public class Accepted{
 		}
 	}
 
+	public void reduceMatrix(){
+		// Create a TreeSet of non-empty columns in matrix. Elements in this 
+		// TreeSet are sorted in decreasing order of their greatest elements.
+		// Since each time we update a column, its low value increases. Storing 
+		// columns in such a TreeSet enables us not to revisit all columns after
+		// each update  
+		TreeSet<Integer> columnPriority = 
+			new TreeSet<Integer>(new Comparator<Integer>(){
+				@Override
+				public int compare(Integer a, Integer b){
+					if(matrix.get(a).getLast() < matrix.get(b).getLast()) 
+						return 1;
+					else if(matrix.get(a).getLast() == matrix.get(b).getLast()) 
+						return 0;
+					else 
+						return -1;
+				}
+			});
+
+		for(int i = 0; i < simplices.size(); i++){
+			LinkedList<Integer> currentColumn = matrix.get(i);
+			// if the current column is empty, we don't add it to the TreeSet
+			if(currentColumn.size() == 0) continue;
+			// check low values of all previous columns and do update if 
+			// necessary
+			for(Integer col : columnPriority){
+				LinkedList<Integer> previousColumn = matrix.get(col);
+				if(previousColumn.size() == 0) continue;
+				// update column: elements of the current column after update
+				// is the set of elements appear in currentColumn or 
+				// previousColumn but not both
+				if(previousColumn.getLast() == currentColumn.getLast()){
+					// create an array to count the number of appearances of
+					// elements in two columns. All values in the array are
+					// initialised to 0.
+					int[] numAppearance = new int[simplices.size()];
+					for(int j = 0; j < simplices.size(); j++)
+						numAppearance[j] = 0;
+					// count the number of appearances
+					for(Integer el : previousColumn) numAppearance[el]++;
+					for(Integer el : currentColumn)	numAppearance[el]++;
+					// update currentColumn
+					currentColumn.clear();
+					for(int j = 0; j < simplices.size(); j++){
+						if(numAppearance[j] == 1) currentColumn.add(j);
+					}
+				}
+				if(currentColumn.size() == 0) break;
+			}
+			// if currentColumn after all updates is non-empty, add it to the
+			// TreeSet
+			if(currentColumn.size() != 0) columnPriority.add(i);
+		}
+	}
+
+
+
 	public static void main(String[] args) throws FileNotFoundException{
 		Accepted obj = new Accepted(args[0]);
-		for(int i = 0; i < obj.simplices.size(); i++){
-			System.out.println(obj.simplices.get(i));
-		}
+		// for(int i = 0; i < obj.simplices.size(); i++){
+		// 	System.out.println(obj.simplices.get(i));
+		// }
+
 		obj.buildMatrix();
+		System.out.println("Matrix before reduction");
+		for(int i = 0; i < obj.simplices.size(); i++){
+			if(obj.matrix.get(i).size() == 0){
+				System.out.println("Empty column");
+				continue;
+			}
+			for(Integer el : obj.matrix.get(i)){
+				System.out.print(el + " ");
+			}
+			System.out.println();
+		}
+		System.out.println("Matrix after reduction");
+		obj.reduceMatrix();
 		for(int i = 0; i < obj.simplices.size(); i++){
 			if(obj.matrix.get(i).size() == 0){
 				System.out.println("Empty column");
