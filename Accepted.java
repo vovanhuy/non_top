@@ -14,10 +14,15 @@ class Barcode{
 		this.left = left;
 		this.right = right;
 	}
+	public String toString(){
+		if(right < 0) return "" + dim + " " + left + " inf";
+		else return "" + dim + " " + left + " " + right;
+	}
 }
 
 public class Accepted{
 	Vector<Simplex> simplices;
+	int numOfSimplices;
 	Vector<LinkedList<Integer>> matrix;
 	Vector<Barcode> barcode;
 
@@ -33,12 +38,12 @@ public class Accepted{
 				else return 1;
 			}
 		});
+		numOfSimplices = simplices.size();
 	}
 
 	public void buildMatrix(){
-		int n = simplices.size();
 		matrix = new Vector<LinkedList<Integer>>();
-		for(int i = 0; i < n; i++){
+		for(int i = 0; i < numOfSimplices; i++){
 			Simplex currentSimplex = simplices.get(i);
 			// create the column in the matrix corresponding to 
 			// the (i+1)-th Simplex
@@ -54,7 +59,7 @@ public class Accepted{
 			// corresponding element in the column is not 0.
 			for(int j = 0; j < verticeArray.length; j++){
 				currentSimplex.vert.remove(verticeArray[j]);
-				for(int k = 0; k < n; k++){
+				for(int k = 0; k < numOfSimplices; k++){
 					if(Simplex.isEqual(currentSimplex, simplices.get(k)) &&
 						k != i){
 						newColumn.add(k);
@@ -90,7 +95,7 @@ public class Accepted{
 				}
 			});
 
-		for(int i = 0; i < simplices.size(); i++){
+		for(int i = 0; i < numOfSimplices; i++){
 			LinkedList<Integer> currentColumn = matrix.get(i);
 			// if the current column is empty, we don't add it to the TreeSet
 			if(currentColumn.size() == 0) continue;
@@ -106,15 +111,15 @@ public class Accepted{
 					// create an array to count the number of appearances of
 					// elements in two columns. All values in the array are
 					// initialised to 0.
-					int[] numAppearance = new int[simplices.size()];
-					for(int j = 0; j < simplices.size(); j++)
+					int[] numAppearance = new int[numOfSimplices];
+					for(int j = 0; j < numOfSimplices; j++)
 						numAppearance[j] = 0;
 					// count the number of appearances
 					for(Integer el : previousColumn) numAppearance[el]++;
 					for(Integer el : currentColumn)	numAppearance[el]++;
 					// update currentColumn
 					currentColumn.clear();
-					for(int j = 0; j < simplices.size(); j++){
+					for(int j = 0; j < numOfSimplices; j++){
 						if(numAppearance[j] == 1) currentColumn.add(j);
 					}
 				}
@@ -126,18 +131,55 @@ public class Accepted{
 		}
 	}
 
+	public void buildBarcode(){
+		// find pivots
+		barcode = new Vector<Barcode>();
+		for(int i = 0; i < numOfSimplices; i++){
+			if(matrix.get(i).size() != 0){
+				barcode.add(new Barcode(
+								simplices.get(matrix.get(i).getLast()).dim, 
+								simplices.get(matrix.get(i).getLast()).val, 
+								simplices.get(i).val)
+				);
+			}
+		}
 
+		//
+		for(int i = 0; i < numOfSimplices; i++){
+			if(matrix.get(i).size() == 0){
+				boolean inf = true;
+				for(int col = 0; col < numOfSimplices; col++){
+					if(matrix.get(col).size() != 0 &&
+						matrix.get(col).getLast() == i){
+						inf = false;
+					break;
+					}
+				}
+				if(inf) barcode.add(new Barcode(simplices.get(i).dim, 
+										simplices.get(i).val, - 1)
+				);
+			}
+		}
+		Collections.sort(barcode, new Comparator<Barcode>(){
+			@Override
+			public int compare(Barcode a, Barcode b){
+				if(a.dim != b.dim) return Integer.compare(a.dim, b.dim);
+				else if(a.left != b.left) return Float.compare(a.left, b.left);
+				else return Float.compare(a.right, b.right);
+			}
+		});
+	}
 
 
 	public static void main(String[] args) throws FileNotFoundException{
 		Accepted obj = new Accepted(args[0]);
-		// for(int i = 0; i < obj.simplices.size(); i++){
+		// for(int i = 0; i < obj.numOfSimplices; i++){
 		// 	System.out.println(obj.simplices.get(i));
 		// }
 
 		obj.buildMatrix();
 		System.out.println("Matrix before reduction");
-		for(int i = 0; i < obj.simplices.size(); i++){
+		for(int i = 0; i < obj.numOfSimplices; i++){
 			if(obj.matrix.get(i).size() == 0){
 				System.out.println("Empty column");
 				continue;
@@ -149,7 +191,7 @@ public class Accepted{
 		}
 		System.out.println("Matrix after reduction");
 		obj.reduceMatrix();
-		for(int i = 0; i < obj.simplices.size(); i++){
+		for(int i = 0; i < obj.numOfSimplices; i++){
 			if(obj.matrix.get(i).size() == 0){
 				System.out.println("Empty column");
 				continue;
@@ -158,6 +200,10 @@ public class Accepted{
 				System.out.print(el + " ");
 			}
 			System.out.println();
+		}
+		obj.buildBarcode();
+		for(int i = 0; i < obj.barcode.size(); i++){
+			System.out.println(obj.barcode.get(i));
 		}
 	}
 
