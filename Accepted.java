@@ -56,8 +56,6 @@ public class Accepted{
                 else{
                     Iterator<Integer> iter1 = a.vert.iterator();
                     Iterator<Integer> iter2 = b.vert.iterator();
-                    assert a.vert.size() == a.dim + 1;
-                    assert b.vert.size() == a.dim + 1;
                     int currentValue1 = -1, currentValue2 = -1;
                     for(int i = 0; i <= a.dim; i++){
                         currentValue1 = iter1.next();
