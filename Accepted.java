@@ -6,9 +6,20 @@ import java.util.Collections;
 import java.io.FileNotFoundException;
 import java.util.Comparator;
 
+class Barcode{
+	int dim;
+	float left, right;
+	public Barcode(int dim, float left, float right){
+		this.dim = dim;
+		this.left = left;
+		this.right = right;
+	}
+}
+
 public class Accepted{
 	Vector<Simplex> simplices;
 	Vector<LinkedList<Integer>> matrix;
+	Vector<Barcode> barcode;
 
 	public Accepted(String filename) throws FileNotFoundException{
 		// sort simplices in increasing order of the time when 
@@ -114,6 +125,7 @@ public class Accepted{
 			if(currentColumn.size() != 0) columnPriority.add(i);
 		}
 	}
+
 
 
 
