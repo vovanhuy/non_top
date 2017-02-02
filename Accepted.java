@@ -144,22 +144,25 @@ public class Accepted{
 			}
 		}
 
-		//
+		// find zeroed out columns i such that row i doest not contain pivots 
 		for(int i = 0; i < numOfSimplices; i++){
 			if(matrix.get(i).size() == 0){
+				// check if row i contains a pivot
 				boolean inf = true;
 				for(int col = 0; col < numOfSimplices; col++){
 					if(matrix.get(col).size() != 0 &&
 						matrix.get(col).getLast() == i){
 						inf = false;
-					break;
+						break;
 					}
 				}
+				// assign right = -1 to signify infinity
 				if(inf) barcode.add(new Barcode(simplices.get(i).dim, 
 										simplices.get(i).val, - 1)
 				);
 			}
 		}
+		// sort barcode in natural increasing order
 		Collections.sort(barcode, new Comparator<Barcode>(){
 			@Override
 			public int compare(Barcode a, Barcode b){
