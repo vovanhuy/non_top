@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.io.FileNotFoundException;
 import java.util.Comparator;
 import java.lang.Math;
+import java.util.Arrays;
+import java.util.Map;
 
 class Barcode{
     int dim;
@@ -54,6 +56,8 @@ public class Accepted{
                 else{
                     Iterator<Integer> iter1 = a.vert.iterator();
                     Iterator<Integer> iter2 = b.vert.iterator();
+                    assert a.vert.size() == a.dim + 1;
+                    assert b.vert.size() == a.dim + 1;
                     int currentValue1 = -1, currentValue2 = -1;
                     for(int i = 0; i <= a.dim; i++){
                         currentValue1 = iter1.next();
@@ -62,13 +66,13 @@ public class Accepted{
                             return Integer.compare(currentValue1, 
                                                    currentValue2);
                     }
-                    return Integer.compare(currentValue1, currentValue2);
+                    return 0;
                 }
             }
         });
         // add simplices to the TreeMap
         for(int i = 0; i < numOfSimplices; i++){
-            position.put(simplices.get(i), i);
+            position.put(new Simplex(simplices.get(i)), i);
         }
     }
 
@@ -206,7 +210,7 @@ public class Accepted{
 
     public static void main(String[] args) throws FileNotFoundException{
         Accepted obj = new Accepted(args[0]);
-        System.out.println(obj.numOfSimplices);
+        // System.out.println(obj.numOfSimplices);
         // for(int i = 0; i < obj.numOfSimplices; i++){
         //  System.out.println(obj.simplices.get(i));
         // }
@@ -214,18 +218,7 @@ public class Accepted{
         obj.buildMatrix();
         System.out.println("Finished building matrix");
 
-        // System.out.println("Matrix before reduction");
-        // for(int i = 0; i < obj.numOfSimplices; i++){
-        //  if(obj.matrix.get(i).size() == 0){
-        //      System.out.println("Empty column");
-        //      continue;
-        //  }
-        //  for(Integer el : obj.matrix.get(i)){
-        //      System.out.print(el + " ");
-        //  }
-        //  System.out.println();
-        // }
-        // System.out.println("Matrix after reduction");
+
         System.out.println("Reducing matrix");
         obj.reduceMatrix();
         System.out.println("Finished reducing matrix");
