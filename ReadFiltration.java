@@ -23,6 +23,15 @@ class Simplex {
 		}
 	}
 
+	Simplex(Simplex a){
+		val = a.val;
+		dim = a.dim;
+		vert = new TreeSet<Integer>();
+		for(Integer el : a.vert){
+			vert.add(el);
+		}
+	}
+
 	Simplex(Scanner sc){
 		val = sc.nextFloat();
 		dim = sc.nextInt();
