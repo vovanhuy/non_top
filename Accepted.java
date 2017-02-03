@@ -27,8 +27,6 @@ class Barcode{
 public class Accepted{
     Vector<Simplex> simplices;
     int numOfSimplices;
-    // A map from a simplex to its position in simplices
-    TreeMap<Simplex, Integer> position;
     Vector<LinkedList<Integer>> matrix;
     Vector<Barcode> barcode;
 
@@ -47,9 +45,10 @@ public class Accepted{
         numOfSimplices = simplices.size();
     }
 
-    private void buildPosition(){
+    private TreeMap<Simplex, Integer> buildPosition(){
         // Initialise the TreeMap and define the comparator on simplices
-        position = new TreeMap<Simplex, Integer>(new Comparator<Simplex>(){
+        TreeMap<Simplex, Integer> position = 
+                        new TreeMap<Simplex, Integer>(new Comparator<Simplex>(){
             @Override
             public int compare(Simplex a, Simplex b){
                 if(a.dim != b.dim) return Integer.compare(a.dim, b.dim);
@@ -72,11 +71,12 @@ public class Accepted{
         for(int i = 0; i < numOfSimplices; i++){
             position.put(new Simplex(simplices.get(i)), i);
         }
+        return position;
     }
 
     public void buildMatrix(){
         matrix = new Vector<LinkedList<Integer>>();
-        buildPosition();
+        TreeMap<Simplex, Integer> position = buildPosition();
         for(int i = 0; i < numOfSimplices; i++){
             Simplex currentSimplex = simplices.get(i);
             // create the column in the matrix corresponding to 
@@ -108,7 +108,7 @@ public class Accepted{
     public void reduceMatrix(){
         // Create a TreeSet of non-empty columns in matrix. Elements in this 
         // TreeSet are sorted in decreasing order of their greatest elements.
-        // Since each time we update a column, its low value increases. Storing 
+        // Since each time we update a column, its low value decreases. Storing 
         // columns in such a TreeSet enables us not to revisit all columns after
         // each update  
         TreeSet<Integer> columnPriority = 
@@ -125,6 +125,7 @@ public class Accepted{
             });
 
         for(int i = 0; i < numOfSimplices; i++){
+            if(i % 1000 == 0) System.out.println(i);
             LinkedList<Integer> currentColumn = matrix.get(i);
             // if the current column is empty, we don't add it to the TreeSet
             if(currentColumn.size() == 0) continue;
@@ -137,25 +138,44 @@ public class Accepted{
                 // is the set of elements appear in currentColumn or 
                 // previousColumn but not both
                 if(previousColumn.getLast() == currentColumn.getLast()){
-                    // create an array to count the number of appearances of
-                    // elements in two columns. All values in the array are
-                    // initialised to 0.
-                    int[] numAppearance = new int[numOfSimplices];
-                    for(int j = 0; j < numOfSimplices; j++)
-                        numAppearance[j] = 0;
-                    // count the number of appearances
-                    for(Integer el : previousColumn) numAppearance[el]++;
-                    for(Integer el : currentColumn) numAppearance[el]++;
-                    // update currentColumn
-                    currentColumn.clear();
-                    for(int j = 0; j < numOfSimplices; j++){
-                        if(numAppearance[j] == 1) currentColumn.add(j);
+                    LinkedList<Integer> newColumn = new LinkedList<Integer>();
+                    Iterator<Integer> iter1 = currentColumn.iterator();
+                    Iterator<Integer> iter2 = previousColumn.iterator();
+                    int currentValue1 = -1, currentValue2 = -1;
+                    while((iter1.hasNext() || currentValue1 != -1) && 
+                          (iter2.hasNext() || currentValue2 != -1)){
+                        if(currentValue1 == -1) currentValue1 = iter1.next();
+                        if(currentValue2 == -1) currentValue2 = iter2.next();
+                        int comp = Integer.compare(currentValue1,currentValue2);
+                        if(comp < 0){
+                            newColumn.add(currentValue1);
+                            currentValue1 = -1;
+                        }
+                        else if(comp > 0){
+                            newColumn.add(currentValue2);
+                            currentValue2 = -1;
+                        }
+                        else{
+                            currentValue1 = -1;
+                            currentValue2 = -1;
+                        }
+
                     }
+                    if(currentValue1 != -1) newColumn.add(currentValue1);
+                    if(currentValue2 != -1) newColumn.add(currentValue2);
+                    while(iter1.hasNext()){
+                        newColumn.add(iter1.next());
+                    }
+                    while(iter2.hasNext()){
+                        newColumn.add(iter2.next());
+                    }
+                    currentColumn = newColumn;
                 }
                 if(currentColumn.size() == 0) break;
             }
             // if currentColumn after all updates is non-empty, add it to the
             // TreeSet
+            matrix.set(i, currentColumn);
             if(currentColumn.size() != 0) columnPriority.add(i);
         }
     }
@@ -208,18 +228,18 @@ public class Accepted{
 
     public static void main(String[] args) throws FileNotFoundException{
         Accepted obj = new Accepted(args[0]);
-        // System.out.println(obj.numOfSimplices);
+        System.out.println("Number of simplices is " + obj.numOfSimplices);
         // for(int i = 0; i < obj.numOfSimplices; i++){
         //  System.out.println(obj.simplices.get(i));
         // }
+        long startTime = System.currentTimeMillis();
         System.out.println("Building matrix");
         obj.buildMatrix();
         System.out.println("Finished building matrix");
+        System.out.println("Time is " + 
+                    (double)(System.currentTimeMillis()-startTime)/1000 + "s");
 
-
-        System.out.println("Reducing matrix");
-        obj.reduceMatrix();
-        System.out.println("Finished reducing matrix");
+        // System.out.println("Matrix before reduction");    
         // for(int i = 0; i < obj.numOfSimplices; i++){
         //  if(obj.matrix.get(i).size() == 0){
         //      System.out.println("Empty column");
@@ -230,12 +250,35 @@ public class Accepted{
         //  }
         //  System.out.println();
         // }
+
+        startTime = System.currentTimeMillis();
+        System.out.println("Reducing matrix");
+        obj.reduceMatrix();
+        System.out.println("Finished reducing matrix");
+        System.out.println("Time is " + 
+                    (double)(System.currentTimeMillis()-startTime)/1000 + "s");
+
+        // System.out.println("Matrix after reduction");
+        // for(int i = 0; i < obj.numOfSimplices; i++){
+        //  if(obj.matrix.get(i).size() == 0){
+        //      System.out.println("Empty column");
+        //      continue;
+        //  }
+        //  for(Integer el : obj.matrix.get(i)){
+        //      System.out.print(el + " ");
+        //  }
+        //  System.out.println();
+        // }
+
+        startTime = System.currentTimeMillis();
         System.out.println("Building barcode");
         obj.buildBarcode();
         System.out.println("Finished building barcode");
-        for(int i = 0; i < obj.barcode.size(); i++){
-            System.out.println(obj.barcode.get(i));
-        }
+        System.out.println("Time is " + 
+                    (double)(System.currentTimeMillis()-startTime)/1000 + "s");
+        // for(int i = 0; i < obj.barcode.size(); i++){
+        //     System.out.println(obj.barcode.get(i));
+        // }
     }
 
 }
