@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.lang.Math;
 import java.util.Arrays;
 import java.util.Map;
+import java.io.PrintWriter;
+import java.io.File;
 
 class Barcode{
     int dim;
@@ -31,7 +33,7 @@ public class Accepted{
     Vector<Barcode> barcode;
 
     public Accepted(String filename) throws FileNotFoundException{
-        // sort simplices in increasing order of the time when 
+        // sort simplices in increasing order of the time when
         // they appear
         simplices = ReadFiltration.readFiltration(filename);
         Collections.sort(simplices, new Comparator<Simplex>(){
@@ -60,7 +62,7 @@ public class Accepted{
                         currentValue1 = iter1.next();
                         currentValue2 = iter2.next();
                         if(currentValue1 != currentValue2)
-                            return Integer.compare(currentValue1, 
+                            return Integer.compare(currentValue1,
                                                    currentValue2);
                     }
                     return 0;
@@ -79,7 +81,7 @@ public class Accepted{
         TreeMap<Simplex, Integer> position = buildPosition();
         for(int i = 0; i < numOfSimplices; i++){
             Simplex currentSimplex = simplices.get(i);
-            // create the column in the matrix corresponding to 
+            // create the column in the matrix corresponding to
             // the (i+1)-th Simplex
             LinkedList<Integer> newColumn = new LinkedList<Integer>();
             // get an array of vertices of currentSimplex
@@ -87,9 +89,9 @@ public class Accepted{
             // temporarily decrease the dimension of currentSimplex to compare
             // with (dim-1)-simplex in the simplicial complexe
             currentSimplex.dim--;
-            // try to remove each of the vertices in verticeArray from 
+            // try to remove each of the vertices in verticeArray from
             // currentSimplex and find the index of simplex obtained after
-            // removing in simplices. We store only indexes of rows whose 
+            // removing in simplices. We store only indexes of rows whose
             // corresponding element in the column is not 0.
             for(int j = 0; j < verticeArray.length; j++){
                 currentSimplex.vert.remove(verticeArray[j]);
@@ -106,20 +108,20 @@ public class Accepted{
     }
 
     public void reduceMatrix(){
-        // Create a TreeSet of non-empty columns in matrix. Elements in this 
+        // Create a TreeSet of non-empty columns in matrix. Elements in this
         // TreeSet are sorted in decreasing order of their greatest elements.
-        // Since each time we update a column, its low value decreases. Storing 
+        // Since each time we update a column, its low value increases. Storing
         // columns in such a TreeSet enables us not to revisit all columns after
-        // each update  
-        TreeSet<Integer> columnPriority = 
+        // each update
+        TreeSet<Integer> columnPriority =
             new TreeSet<Integer>(new Comparator<Integer>(){
                 @Override
                 public int compare(Integer a, Integer b){
-                    if(matrix.get(a).getLast() < matrix.get(b).getLast()) 
+                    if(matrix.get(a).getLast() < matrix.get(b).getLast())
                         return 1;
-                    else if(matrix.get(a).getLast() == matrix.get(b).getLast()) 
+                    else if(matrix.get(a).getLast() == matrix.get(b).getLast())
                         return 0;
-                    else 
+                    else
                         return -1;
                 }
             });
@@ -129,13 +131,13 @@ public class Accepted{
             LinkedList<Integer> currentColumn = matrix.get(i);
             // if the current column is empty, we don't add it to the TreeSet
             if(currentColumn.size() == 0) continue;
-            // check low values of all previous columns and do update if 
+            // check low values of all previous columns and do update if
             // necessary
             for(Integer col : columnPriority){
                 LinkedList<Integer> previousColumn = matrix.get(col);
                 if(previousColumn.size() == 0) continue;
                 // update column: elements of the current column after update
-                // is the set of elements appear in currentColumn or 
+                // is the set of elements appear in currentColumn or
                 // previousColumn but not both
                 if(previousColumn.getLast() == currentColumn.getLast()){
                     LinkedList<Integer> newColumn = new LinkedList<Integer>();
@@ -186,14 +188,14 @@ public class Accepted{
         for(int i = 0; i < numOfSimplices; i++){
             if(matrix.get(i).size() != 0){
                 barcode.add(new Barcode(
-                                simplices.get(matrix.get(i).getLast()).dim, 
-                                simplices.get(matrix.get(i).getLast()).val, 
+                                simplices.get(matrix.get(i).getLast()).dim,
+                                simplices.get(matrix.get(i).getLast()).val,
                                 simplices.get(i).val)
                 );
             }
         }
 
-        // find zeroed out columns i such that row i doest not contain pivots 
+        // find zeroed out columns i such that row i doest not contain pivots
         for(int i = 0; i < numOfSimplices; i++){
             if(matrix.get(i).size() == 0){
                 // check if row i contains a pivot
@@ -206,7 +208,7 @@ public class Accepted{
                     }
                 }
                 // assign right = -1 to signify infinity
-                if(inf) barcode.add(new Barcode(simplices.get(i).dim, 
+                if(inf) barcode.add(new Barcode(simplices.get(i).dim,
                                         simplices.get(i).val, - 1)
                 );
             }
@@ -222,6 +224,22 @@ public class Accepted{
         });
     }
 
+		public void writeToFile(String filename) {
+			File f = new File(filename);
+			PrintWriter writer = null;
+			try {
+				writer = new PrintWriter(f);
+				for(int i = 0; i < barcode.size(); i++){
+					writer.println(barcode.get(i));
+				}
+			} catch (Exception e) {
+				System.out.print("Error");
+			} finally {
+				if (writer != null)
+					writer.close();
+			}
+
+		}
 
 
 
@@ -279,6 +297,9 @@ public class Accepted{
         // for(int i = 0; i < obj.barcode.size(); i++){
         //     System.out.println(obj.barcode.get(i));
         // }
+        for(int i = 0; i < obj.barcode.size(); i++){
+            System.out.println(obj.barcode.get(i));
+        }
     }
 
 }
