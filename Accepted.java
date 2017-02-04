@@ -227,22 +227,22 @@ public class Accepted{
         });
     }
 
-		public void writeToFile(String filename) {
-			File f = new File(filename);
-			PrintWriter writer = null;
-			try {
-				writer = new PrintWriter(f);
-				for(int i = 0; i < barcode.size(); i++){
-					writer.println(barcode.get(i));
-				}
-			} catch (Exception e) {
-				System.out.print("Error");
-			} finally {
-				if (writer != null)
-					writer.close();
+	public void writeBarcode(String filename) {
+		File f = new File(filename);
+		PrintWriter writer = null;
+		try {
+			writer = new PrintWriter(f);
+			for(int i = 0; i < barcode.size(); i++){
+				writer.println(barcode.get(i));
 			}
-
+		} catch (Exception e) {
+			System.out.print("Error");
+		} finally {
+			if (writer != null)
+				writer.close();
 		}
+
+	}
 
 
 
@@ -306,9 +306,11 @@ public class Accepted{
         // for(int i = 0; i < obj.barcode.size(); i++){
         //     System.out.println(obj.barcode.get(i));
         // }
-        for(int i = 0; i < obj.barcode.size(); i++){
-            System.out.println(obj.barcode.get(i));
-        }
+        // for(int i = 0; i < obj.barcode.size(); i++){
+        //     System.out.println(obj.barcode.get(i));
+        // }
+        obj.writeBarcode("result/B.barcode");
+
     }
 
 }
