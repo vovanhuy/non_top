@@ -135,11 +135,11 @@ public class Accepted{
             // necessary
             for(Integer col : columnPriority){
                 LinkedList<Integer> previousColumn = matrix.get(col);
-                if(previousColumn.size() == 0) continue;
+                // if(previousColumn.size() == 0) continue;
                 // update column: elements of the current column after update
                 // is the set of elements appear in currentColumn or
                 // previousColumn but not both
-                if(previousColumn.getLast() == currentColumn.getLast()){
+                if(previousColumn.getLast().intValue() == currentColumn.getLast().intValue()){
                     LinkedList<Integer> newColumn = new LinkedList<Integer>();
                     Iterator<Integer> iter1 = currentColumn.iterator();
                     Iterator<Integer> iter2 = previousColumn.iterator();
@@ -172,6 +172,9 @@ public class Accepted{
                         newColumn.add(iter2.next());
                     }
                     currentColumn = newColumn;
+                }
+                else if(previousColumn.getLast() < currentColumn.getLast()){
+                    break;
                 }
                 if(currentColumn.size() == 0) break;
             }
@@ -256,7 +259,7 @@ public class Accepted{
         System.out.println("Finished building matrix");
         System.out.println("Time is " + 
                     (double)(System.currentTimeMillis()-startTime)/1000 + "s");
-
+        
         // System.out.println("Matrix before reduction");    
         // for(int i = 0; i < obj.numOfSimplices; i++){
         //  if(obj.matrix.get(i).size() == 0){
@@ -275,6 +278,12 @@ public class Accepted{
         System.out.println("Finished reducing matrix");
         System.out.println("Time is " + 
                     (double)(System.currentTimeMillis()-startTime)/1000 + "s");
+
+
+        // System.out.println(obj.matrix.lastElement());
+        // for(Integer el : obj.matrix.lastElement()){
+        //     System.out.println(obj.simplices.get(el));
+        // }
 
         // System.out.println("Matrix after reduction");
         // for(int i = 0; i < obj.numOfSimplices; i++){
