@@ -187,6 +187,10 @@ public class Accepted{
 
     public void buildBarcode(){
         // find pivots
+        int[] pivot = new int[numOfSimplices];
+        for(int i = 0; i < numOfSimplices; i++){
+            pivot[i] = -1;
+        }
         barcode = new Vector<Barcode>();
         for(int i = 0; i < numOfSimplices; i++){
             if(matrix.get(i).size() != 0){
@@ -195,26 +199,13 @@ public class Accepted{
                                 simplices.get(matrix.get(i).getLast()).val,
                                 simplices.get(i).val)
                 );
+                pivot[matrix.get(i).getLast()] = i;
             }
         }
 
-        // find zeroed out columns i such that row i doest not contain pivots
         for(int i = 0; i < numOfSimplices; i++){
-            if(matrix.get(i).size() == 0){
-                // check if row i contains a pivot
-                boolean inf = true;
-                for(int col = 0; col < numOfSimplices; col++){
-                    if(matrix.get(col).size() != 0 &&
-                        matrix.get(col).getLast() == i){
-                        inf = false;
-                        break;
-                    }
-                }
-                // assign right = -1 to signify infinity
-                if(inf) barcode.add(new Barcode(simplices.get(i).dim,
-                                        simplices.get(i).val, - 1)
-                );
-            }
+            if(pivot[i] == -1) barcode.add(new Barcode(simplices.get(i).dim,
+                                    simplices.get(i).val, - 1));
         }
         // sort barcode in natural increasing order
         Collections.sort(barcode, new Comparator<Barcode>(){
