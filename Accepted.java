@@ -117,12 +117,18 @@ public class Accepted{
             new TreeSet<Integer>(new Comparator<Integer>(){
                 @Override
                 public int compare(Integer a, Integer b){
-                    if(matrix.get(a).getLast() < matrix.get(b).getLast())
-                        return 1;
-                    else if(matrix.get(a).getLast() == matrix.get(b).getLast())
-                        return 0;
-                    else
-                        return -1;
+                    if(simplices.get(a).dim != simplices.get(b).dim){
+                        return -Integer.compare(simplices.get(a).dim,
+                                                simplices.get(b).dim);
+                    }
+                    else{
+                        if(matrix.get(a).getLast() < matrix.get(b).getLast())
+                            return 1;
+                        else if(matrix.get(a).getLast() == matrix.get(b).getLast())
+                            return 0;
+                        else
+                            return -1;
+                    }
                 }
             });
 
