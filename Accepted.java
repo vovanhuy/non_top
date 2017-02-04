@@ -210,7 +210,7 @@ public class Accepted{
         }
 
         for(int i = 0; i < numOfSimplices; i++){
-            if(pivot[i] == -1) barcode.add(new Barcode(simplices.get(i).dim,
+            if(pivot[i] == -1 && matrix.get(i).size() == 0) barcode.add(new Barcode(simplices.get(i).dim,
                                     simplices.get(i).val, - 1));
         }
         // sort barcode in natural increasing order
@@ -303,10 +303,10 @@ public class Accepted{
         // for(int i = 0; i < obj.barcode.size(); i++){
         //     System.out.println(obj.barcode.get(i));
         // }
-        // for(int i = 0; i < obj.barcode.size(); i++){
-        //     System.out.println(obj.barcode.get(i));
-        // }
-        obj.writeBarcode("result/B.barcode");
+        for(int i = 0; i < obj.barcode.size(); i++){
+            System.out.println(obj.barcode.get(i));
+        }
+        // obj.writeBarcode("result/B.barcode");
 
     }
 
