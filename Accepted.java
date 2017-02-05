@@ -32,6 +32,7 @@ public class Accepted{
     Vector<LinkedList<Integer>> matrix;
     TreeMap<Simplex, Integer> position;
     Vector<Barcode> barcode;
+    int[] simplexDimension;
 
     public Accepted(String filename) throws FileNotFoundException{
         // sort simplices in increasing order of the time when
@@ -45,6 +46,18 @@ public class Accepted{
             }
         });
         numOfSimplices = simplices.size();
+        simplexDimension = new int[numOfSimplices];
+        for(int i = 0; i < numOfSimplices; i++){
+        	simplexDimension[i] = simplices.get(i).dim;
+        }
+    }
+
+    private int maxDimension(){
+    	int maxDim = 0;
+    	for(int i = 0; i < numOfSimplices; i++){
+    		if(maxDim < simplexDimension[i]) maxDim = simplexDimension[i];
+    	}
+    	return maxDim;
     }
 
     private void buildPosition(){
@@ -112,33 +125,32 @@ public class Accepted{
         // Since each time we update a column, its low value increases. Storing
         // columns in such a TreeSet enables us not to revisit all columns after
         // each update
-        TreeSet<Integer> columnPriority =
-            new TreeSet<Integer>(new Comparator<Integer>(){
+        Vector<TreeSet<Integer>> columnPriority = 
+        										new Vector<TreeSet<Integer>>();
+        for(int i = 0; i <= maxDimension(); i++){
+            columnPriority.add(new TreeSet<Integer>(new Comparator<Integer>(){
                 @Override
                 public int compare(Integer a, Integer b){
-                    if(simplices.get(a).dim != simplices.get(b).dim){
-                        return -Integer.compare(simplices.get(a).dim,
-                                                simplices.get(b).dim);
-                    }
-                    else{
-                        if(matrix.get(a).getLast() < matrix.get(b).getLast())
-                            return 1;
-                        else if(matrix.get(a).getLast() == matrix.get(b).getLast())
-                            return 0;
-                        else
-                            return -1;
-                    }
+                    if(matrix.get(a).getLast() < matrix.get(b).getLast())
+                        return 1;
+                    else if(matrix.get(a).getLast().intValue() == 
+                    		matrix.get(b).getLast().intValue())
+                        return 0;
+                    else
+                        return -1;
                 }
-            });
+            }));
+        }
 
         for(int i = 0; i < numOfSimplices; i++){
+        	// debug
             if(i % 1000 == 0) System.out.println(i);
             LinkedList<Integer> currentColumn = matrix.get(i);
-            // if the current column is empty, we don't add it to the TreeSet
+            // if the current column is empty, we have nothing to do
             if(currentColumn.size() == 0) continue;
             // check low values of all previous columns and do update if
             // necessary
-            for(Integer col : columnPriority){
+            for(Integer col : columnPriority.get(simplexDimension[i])){
                 LinkedList<Integer> previousColumn = matrix.get(col);
                 // if(previousColumn.size() == 0) continue;
                 // update column: elements of the current column after update
@@ -151,8 +163,10 @@ public class Accepted{
                     int currentValue1 = -1, currentValue2 = -1;
                     while((iter1.hasNext() || currentValue1 != -1) && 
                           (iter2.hasNext() || currentValue2 != -1)){
-                        if(currentValue1 == -1) currentValue1 = iter1.next();
-                        if(currentValue2 == -1) currentValue2 = iter2.next();
+                        if(currentValue1 == -1) 
+                        	currentValue1 = iter1.next().intValue();
+                        if(currentValue2 == -1) 
+                        	currentValue2 = iter2.next().intValue();
                         int comp = Integer.compare(currentValue1,currentValue2);
                         if(comp < 0){
                             newColumn.add(currentValue1);
@@ -178,7 +192,8 @@ public class Accepted{
                     }
                     currentColumn = newColumn;
                 }
-                else if(previousColumn.getLast() < currentColumn.getLast()){
+                else if(previousColumn.getLast().intValue() < 
+                							currentColumn.getLast().intValue()){
                     break;
                 }
                 if(currentColumn.size() == 0) break;
@@ -186,7 +201,8 @@ public class Accepted{
             // if currentColumn after all updates is non-empty, add it to the
             // TreeSet
             matrix.set(i, currentColumn);
-            if(currentColumn.size() != 0) columnPriority.add(i);
+            if(currentColumn.size() != 0) columnPriority.get(
+            									simplexDimension[i]).add(i);
         }
     }
 
@@ -200,8 +216,12 @@ public class Accepted{
         for(int i = 0; i < numOfSimplices; i++){
             if(matrix.get(i).size() != 0){
                 barcode.add(new Barcode(
-                                simplices.get(matrix.get(i).getLast()).dim,
-                                simplices.get(matrix.get(i).getLast()).val,
+                                simplices.get(
+                                	matrix.get(i).getLast().intValue()
+                                	).dim,
+                                simplices.get(
+                                	matrix.get(i).getLast().intValue()
+                                	).val,
                                 simplices.get(i).val)
                 );
                 pivot[matrix.get(i).getLast()] = i;
@@ -209,7 +229,8 @@ public class Accepted{
         }
 
         for(int i = 0; i < numOfSimplices; i++){
-            if(pivot[i] == -1 && matrix.get(i).size() == 0) barcode.add(new Barcode(simplices.get(i).dim,
+            if(pivot[i] == -1 && matrix.get(i).size() == 0) 
+            	barcode.add(new Barcode(simplices.get(i).dim,
                                     simplices.get(i).val, - 1));
         }
         // sort barcode in natural increasing order
