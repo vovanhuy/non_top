@@ -76,7 +76,7 @@ public class Accepted{
 
     public void buildMatrix(){
         matrix = new Vector<LinkedList<Integer>>();
-        TreeMap<Simplex, Integer> position = buildPosition();
+        buildPosition();
         for(int i = 0; i < numOfSimplices; i++){
             Simplex currentSimplex = simplices.get(i);
             // create the column in the matrix corresponding to
@@ -103,6 +103,7 @@ public class Accepted{
             Collections.sort(newColumn);
             matrix.add(newColumn);
         }
+        position.clear();
     }
 
     public void reduceMatrix(){
