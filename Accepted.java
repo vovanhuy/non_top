@@ -30,6 +30,7 @@ public class Accepted{
     Vector<Simplex> simplices;
     int numOfSimplices;
     Vector<LinkedList<Integer>> matrix;
+    TreeMap<Simplex, Integer> position;
     Vector<Barcode> barcode;
 
     public Accepted(String filename) throws FileNotFoundException{
@@ -39,18 +40,16 @@ public class Accepted{
         Collections.sort(simplices, new Comparator<Simplex>(){
             @Override
             public int compare(Simplex a, Simplex b){
-                if(a.val < b.val) return -1;
-                else if(a.val == b.val) return 0;
-                else return 1;
+                if(a.val != b.val) return Float.compare(a.val, b.val);
+                else return Integer.compare(a.dim, b.dim);
             }
         });
         numOfSimplices = simplices.size();
     }
 
-    private TreeMap<Simplex, Integer> buildPosition(){
+    private void buildPosition(){
         // Initialise the TreeMap and define the comparator on simplices
-        TreeMap<Simplex, Integer> position = 
-                        new TreeMap<Simplex, Integer>(new Comparator<Simplex>(){
+        position = new TreeMap<Simplex, Integer>(new Comparator<Simplex>(){
             @Override
             public int compare(Simplex a, Simplex b){
                 if(a.dim != b.dim) return Integer.compare(a.dim, b.dim);
@@ -73,7 +72,6 @@ public class Accepted{
         for(int i = 0; i < numOfSimplices; i++){
             position.put(new Simplex(simplices.get(i)), i);
         }
-        return position;
     }
 
     public void buildMatrix(){
@@ -303,10 +301,10 @@ public class Accepted{
         // for(int i = 0; i < obj.barcode.size(); i++){
         //     System.out.println(obj.barcode.get(i));
         // }
-        for(int i = 0; i < obj.barcode.size(); i++){
-            System.out.println(obj.barcode.get(i));
-        }
-        // obj.writeBarcode("result/B.barcode");
+        // for(int i = 0; i < obj.barcode.size(); i++){
+        //     System.out.println(obj.barcode.get(i));
+        // }
+        obj.writeBarcode(args[1]);
 
     }
 
