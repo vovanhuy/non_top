@@ -47,6 +47,7 @@ public class Accepted{
         });
         numOfSimplices = simplices.size();
         simplexDimension = new int[numOfSimplices];
+        simplexValue = new float[numOfSimplices];
         for(int i = 0; i < numOfSimplices; i++){
         	simplexDimension[i] = simplices.get(i).dim;
         }
@@ -85,12 +86,17 @@ public class Accepted{
         for(int i = 0; i < numOfSimplices; i++){
             position.put(new Simplex(simplices.get(i)), i);
         }
+        // simplices.clear();
     }
 
     public void buildMatrix(){
         matrix = new Vector<LinkedList<Integer>>();
         buildPosition();
         for(int i = 0; i < numOfSimplices; i++){
+            // debug
+            if(i % 1000 == 0){
+                System.out.println(i);
+            }
             Simplex currentSimplex = simplices.get(i);
             // create the column in the matrix corresponding to
             // the (i+1)-th Simplex
@@ -105,13 +111,16 @@ public class Accepted{
             // removing in simplices. We store only indexes of rows whose
             // corresponding element in the column is not 0.
             for(int j = 0; j < verticeArray.length; j++){
-                currentSimplex.vert.remove(verticeArray[j]);
+                Integer temp_el = currentSimplex.vert.floor(verticeArray[j]);
                 Integer pos = position.get(currentSimplex);
                 if(pos != null) newColumn.add(pos);
-                currentSimplex.vert.add(verticeArray[j]);
+                currentSimplex.vert.add(temp_el);
             }
             // re-increase the dimension of currentSimplex
             currentSimplex.dim++;
+            // we no longer need vertices of a simplex, so we clear 
+            // vector containing its vertives to save memory 
+            currentSimplex.vert.clear();
             // add the new column to the matrix
             Collections.sort(newColumn);
             matrix.add(newColumn);
