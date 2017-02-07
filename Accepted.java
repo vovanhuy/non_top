@@ -47,7 +47,6 @@ public class Accepted{
         });
         numOfSimplices = simplices.size();
         simplexDimension = new int[numOfSimplices];
-        simplexValue = new float[numOfSimplices];
         for(int i = 0; i < numOfSimplices; i++){
         	simplexDimension[i] = simplices.get(i).dim;
         }
@@ -86,17 +85,12 @@ public class Accepted{
         for(int i = 0; i < numOfSimplices; i++){
             position.put(new Simplex(simplices.get(i)), i);
         }
-        // simplices.clear();
     }
 
     public void buildMatrix(){
         matrix = new Vector<LinkedList<Integer>>();
         buildPosition();
         for(int i = 0; i < numOfSimplices; i++){
-            // debug
-            if(i % 1000 == 0){
-                System.out.println(i);
-            }
             Simplex currentSimplex = simplices.get(i);
             // create the column in the matrix corresponding to
             // the (i+1)-th Simplex
@@ -111,10 +105,10 @@ public class Accepted{
             // removing in simplices. We store only indexes of rows whose
             // corresponding element in the column is not 0.
             for(int j = 0; j < verticeArray.length; j++){
-                Integer temp_el = currentSimplex.vert.floor(verticeArray[j]);
+                currentSimplex.vert.remove(verticeArray[j]);
                 Integer pos = position.get(currentSimplex);
                 if(pos != null) newColumn.add(pos);
-                currentSimplex.vert.add(temp_el);
+                currentSimplex.vert.add(verticeArray[j]);
             }
             // re-increase the dimension of currentSimplex
             currentSimplex.dim++;
@@ -153,7 +147,7 @@ public class Accepted{
 
         for(int i = 0; i < numOfSimplices; i++){
         	// debug
-            if(i % 1000 == 0) System.out.println(i);
+            // if(i % 1000 == 0) System.out.println(i);
             LinkedList<Integer> currentColumn = matrix.get(i);
             // if the current column is empty, we have nothing to do
             if(currentColumn.size() == 0) continue;
@@ -172,11 +166,15 @@ public class Accepted{
                     int currentValue1 = -1, currentValue2 = -1;
                     while((iter1.hasNext() || currentValue1 != -1) && 
                           (iter2.hasNext() || currentValue2 != -1)){
+
                         if(currentValue1 == -1) 
                         	currentValue1 = iter1.next().intValue();
                         if(currentValue2 == -1) 
                         	currentValue2 = iter2.next().intValue();
+
                         int comp = Integer.compare(currentValue1,currentValue2);
+                        // add the smaller one between currentValue1 and currentValue2 to
+                        // newColumn
                         if(comp < 0){
                             newColumn.add(currentValue1);
                             currentValue1 = -1;
@@ -199,8 +197,11 @@ public class Accepted{
                     while(iter2.hasNext()){
                         newColumn.add(iter2.next());
                     }
+
+                    // update the i-th column
                     currentColumn = newColumn;
                 }
+                // early stopping
                 else if(previousColumn.getLast().intValue() < 
                 							currentColumn.getLast().intValue()){
                     break;
@@ -216,11 +217,14 @@ public class Accepted{
     }
 
     public void buildBarcode(){
-        // find pivots
+        // construct an array to store the pivot's 
         int[] pivot = new int[numOfSimplices];
         for(int i = 0; i < numOfSimplices; i++){
             pivot[i] = -1;
         }
+
+        // build barcode for rows that have a pivot
+        // fill the pivot array
         barcode = new Vector<Barcode>();
         for(int i = 0; i < numOfSimplices; i++){
             if(matrix.get(i).size() != 0){
@@ -237,11 +241,13 @@ public class Accepted{
             }
         }
 
+        // build barcode for columns which are zeroed out
         for(int i = 0; i < numOfSimplices; i++){
             if(pivot[i] == -1 && matrix.get(i).size() == 0) 
             	barcode.add(new Barcode(simplices.get(i).dim,
                                     simplices.get(i).val, - 1));
         }
+
         // sort barcode in natural increasing order
         Collections.sort(barcode, new Comparator<Barcode>(){
             @Override
@@ -254,6 +260,7 @@ public class Accepted{
     }
 
 	public void writeBarcode(String filename) {
+        // write barcodes to a file.
 		File f = new File(filename);
 		PrintWriter writer = null;
 		try {
@@ -276,9 +283,7 @@ public class Accepted{
     public static void main(String[] args) throws FileNotFoundException{
         Accepted obj = new Accepted(args[0]);
         System.out.println("Number of simplices is " + obj.numOfSimplices);
-        // for(int i = 0; i < obj.numOfSimplices; i++){
-        //  System.out.println(obj.simplices.get(i));
-        // }
+        
         long startTime = System.currentTimeMillis();
         System.out.println("Building matrix");
         obj.buildMatrix();
@@ -286,17 +291,6 @@ public class Accepted{
         System.out.println("Time is " + 
                     (double)(System.currentTimeMillis()-startTime)/1000 + "s");
         
-        // System.out.println("Matrix before reduction");    
-        // for(int i = 0; i < obj.numOfSimplices; i++){
-        //  if(obj.matrix.get(i).size() == 0){
-        //      System.out.println("Empty column");
-        //      continue;
-        //  }
-        //  for(Integer el : obj.matrix.get(i)){
-        //      System.out.print(el + " ");
-        //  }
-        //  System.out.println();
-        // }
 
         startTime = System.currentTimeMillis();
         System.out.println("Reducing matrix");
@@ -306,35 +300,13 @@ public class Accepted{
                     (double)(System.currentTimeMillis()-startTime)/1000 + "s");
 
 
-        // System.out.println(obj.matrix.lastElement());
-        // for(Integer el : obj.matrix.lastElement()){
-        //     System.out.println(obj.simplices.get(el));
-        // }
-
-        // System.out.println("Matrix after reduction");
-        // for(int i = 0; i < obj.numOfSimplices; i++){
-        //  if(obj.matrix.get(i).size() == 0){
-        //      System.out.println("Empty column");
-        //      continue;
-        //  }
-        //  for(Integer el : obj.matrix.get(i)){
-        //      System.out.print(el + " ");
-        //  }
-        //  System.out.println();
-        // }
-
         startTime = System.currentTimeMillis();
         System.out.println("Building barcode");
         obj.buildBarcode();
         System.out.println("Finished building barcode");
         System.out.println("Time is " + 
                     (double)(System.currentTimeMillis()-startTime)/1000 + "s");
-        // for(int i = 0; i < obj.barcode.size(); i++){
-        //     System.out.println(obj.barcode.get(i));
-        // }
-        // for(int i = 0; i < obj.barcode.size(); i++){
-        //     System.out.println(obj.barcode.get(i));
-        // }
+        
         obj.writeBarcode(args[1]);
 
     }
