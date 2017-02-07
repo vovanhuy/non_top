@@ -1,0 +1,6 @@
+1. Group members: VO Van Huy and NGUYEN Ta Duy
+2. To compile, run
+    javac *.java
+3. To generate barcodes for a filtration, run
+    java Accepted input output
+  where "input" is the name of the file that contains the filtration and "output" is the expected name of the file that contains the output barcodes corresponding to the input filtration.
