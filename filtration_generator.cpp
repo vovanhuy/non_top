@@ -39,7 +39,7 @@ void build_simplices(){
 
 int main(int argc,char *argv[]){
 	if(argc != 3){
-		cout << "Enter arguments" << endl;
+		cout << "Please enter input and output files" << endl;
 		return 1;
 	}
 	stringstream ss(argv[1]);

@@ -40,16 +40,6 @@ class Simplex {
 			vert.add(sc.nextInt());
 	}
 
-	static boolean isEqual(Simplex a, Simplex b){
-		if(a.dim != b.dim) return false;
-
-		Iterator<Integer> iter1 = a.vert.iterator(), iter2 = b.vert.iterator();
-		for(int i = 0; i <= a.dim; i++){
-			if(iter1.next() != iter2.next()) return false;
-		}
-		return true;
-	}
-
 	Integer[] getVerticeArray(){
 		Integer[] verticeArray = new Integer[vert.size()];
 		Iterator<Integer> iter = vert.iterator();
@@ -88,13 +78,11 @@ public class ReadFiltration {
 		Simplex b = new Simplex(3, 2, new int[]{4, 1, 3});
 		System.out.println(a);
 		System.out.println(b);
-		System.out.println(Simplex.isEqual(a, b));
 		Integer[] verticeArray = a.getVerticeArray();
 		System.out.println(Arrays.toString(verticeArray));
 		a.dim--;
 		for(int i = 0; i < verticeArray.length; i++){
 			a.vert.remove(verticeArray[i]);
-			System.out.println(Simplex.isEqual(a, new Simplex(1, 1, new int[]{1,2})));
 			a.vert.add(verticeArray[i]);
 		}
 	}

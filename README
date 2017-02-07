@@ -1,15 +1,34 @@
 1. Group members: VO Van Huy and NGUYEN Ta Duy
 
-2. To construct barcodes of a filtration contained in filtration.txt and output 
+2. Two principle Java source files are Accepted.java and ReadFiltration.java.
+	- ReadFiltration.java provides classes to read filtrations from files
+	- Accepted.java provides a class (Accepted) to build boundary matrix,
+	reduce boundary matrix and build barcodes
+
+3. A C++ source file used for generating filtrations of d-balls and d-spheres:
+	filtration_generator.cpp
+
+4. Filtrations that we construct for classical spaces can be found in folder
+data/ 
+
+5. A ipython notebook is given in folder python/ containing visualization of
+some filtrations
+
+6. The answers for the questions as well as a complexity analysis is given in
+the file report.pdf
+
+7. To construct barcodes of a filtration contained in filtration.txt and output 
 results to filtration.barcode, type in the terminal:
 	javac Accepted.java
 	java Accepted filtration.txt filtration.barcode
 
-3. To generate a filtration for d-ball and d-sphere and output results in a file
+8. To generate a filtration for d-ball and d-sphere and output results in a file
 output.txt, type in the terminal:
 	g++ -std=c++11 filtration_generator.cpp -o filtration_generator
 	./filtration_generator d type > output.txt
 where type is ball or sphere
 
-4. Filtrations that we construct for classical spaces can be found in folder
-data/ 
+
+
+
+
